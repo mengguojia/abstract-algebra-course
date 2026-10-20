@@ -27,6 +27,8 @@ node server.mjs
 
 语言模式：中文、英文、双语。语言与已答对题目保存在当前浏览器的 localStorage。答对每课两道自测才标记完成。在“阅读室”清空学习进度。
 
+对称实验逐步演示整个正方形的旋转与反射，并显示复合顺序、运动轨迹与顶点去向；表示课同时展示两个基向量。循环群实验支持单步与完整轨道播放，显示首次回到零的步数。动画由用户操作触发，群元素与矩阵在每步完成后更新。
+
 ## 文件
 
 - `dist/index.html`：网站入口。
@@ -36,11 +38,15 @@ node server.mjs
 - `dist/lesson-blocks.js`、`dist/lesson-renderer.js`：正文、比较、构造、论证与练习的基础呈现组件。
 - `dist/math.js`：精确有限代数运算。
 - `dist/widgets.js`：HTML/SVG 实验。
+- `dist/symmetry-lab.js`、`dist/symmetry-motion.js`、`dist/symmetry.css`：对称动作、分步复合与动态几何。
+- `dist/cyclic-lab.js`、`dist/cyclic.css`：循环轨道的逐步演示。
+- `dist/lab-ui.js`：实验共用的双语文本。
 - `dist/app.js`：页面、导航与进度。
 - `dist/style.css`：响应式样式。
 - `dist/narrative.css`：按内容类型区分的阅读与教学版式。
 - `tests/algebra.test.mjs`：代数性质穷举验证与课程完整性检查。
 - `tests/curriculum.test.mjs`：大纲覆盖、先修路径、双语叙事与答题记录检查。
+- `tests/symmetry-motion.test.mjs`、`tests/cyclic-motion.test.mjs`：动画端点、运动轨迹与精确代数结果的一致性。
 
 ```powershell
 npm test

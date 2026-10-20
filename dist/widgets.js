@@ -1,6 +1,8 @@
-import {mod,gcd,orbit,cosets,d4mul,d4apply,units,inverse,gf4mul,sylowCandidates} from './math.js';
-export const htmlText=value=>value.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
-export const bi=(zh,en)=>`<span class="bi"><span class="zh" lang="zh-CN">${htmlText(zh)}</span><span class="en" lang="en">${htmlText(en)}</span></span>`;
+import {mod,gcd,cosets,units,gf4mul,sylowCandidates} from './math.js';
+import {bi} from './lab-ui.js';
+import {mountSymmetryLab} from './symmetry-lab.js';
+import {mountCyclicLab} from './cyclic-lab.js';
+export {bi,htmlText} from './lab-ui.js';
 const options=(values,current)=>values.map(v=>`<option value="${v}" ${v===current?'selected':''}>${v}</option>`).join('');
 const select=(id,label,values,current)=>`<label>${label} <select data-control="${id}">${options(values,current)}</select></label>`;
 const svg=(content,label='Mathematical diagram')=>`<svg viewBox="0 0 440 280" role="img" aria-label="${label}">${content}</svg>`;
@@ -8,39 +10,14 @@ const circle=(x,y,r,fill='#28634c')=>`<circle cx="${x}" cy="${y}" r="${r}" fill=
 const text=(x,y,t,fill='#20362f',size=15)=>`<text x="${x}" y="${y}" text-anchor="middle" style="fill:${fill};font-size:${size}px">${t}</text>`;
 const line=(x,y,u,v,color='#a0b197')=>`<line x1="${x}" y1="${y}" x2="${u}" y2="${v}" stroke="${color}" stroke-width="2"/>`;
 const pill=(x,on=false)=>`<span class="pill ${on?'on':''}">${x}</span>`;
-const point=i=>[220+95*Math.cos(i*Math.PI/2),140-95*Math.sin(i*Math.PI/2)];
-function square(g){const pts=[0,1,2,3].map(point);return svg(`<path d="M${pts.map(p=>p.join(',')).join(' L')}Z" fill="#d8e8b0" stroke="#527b5a" stroke-width="2"/>`+[0,1,2,3].map(i=>{const [x,y]=point(d4apply(g,i));return `<g data-vertex="${i}" style="transform:translate(${x}px,${y}px);transition:transform .55s">${circle(0,0,17,['#28634c','#b76838','#52768d','#7c6594'][i])}${text(0,5,i+1,'white')}</g>`;}).join(''),'D4: labeled square / 带标号的正方形');}
-const gname=([a,b])=>(a?['','r','r²','r³'][a]:'')+(b?'s':'')||'e';
-function clock(n,k,step){const path=orbit(n,k), active=path.slice(0,step+1);const pts=Array.from({length:n},(_,i)=>[220+105*Math.sin(2*Math.PI*i/n),140-105*Math.cos(2*Math.PI*i/n)]);return svg(active.slice(1).map((v,i)=>line(...pts[active[i]],...pts[v],'#28634c')).join('')+pts.map(([x,y],i)=>circle(x,y,17,active.includes(i)?'#28634c':'#fffef9')+text(x,y+5,i,active.includes(i)?'#fff':'#20362f')).join(''),'Cyclic orbit / 循环轨道');}
 function shell(root,intro,controls){root.innerHTML=`<p>${intro}</p><div class="controls">${controls}</div><div class="stage"></div><output aria-live="polite"></output>`;return {stage:root.querySelector('.stage'),out:root.querySelector('output'),val:id=>Number(root.querySelector(`[data-control="${id}"]`).value)};}
 function table(n,fn,hl=()=>false,names=Array.from({length:n},(_,i)=>i)){return `<div class="table-wrap"><table><thead><tr><th scope="col">⋆</th>${names.map(x=>`<th scope="col">${x}</th>`).join('')}</tr></thead><tbody>${names.map((x,a)=>`<tr><th scope="row">${x}</th>${names.map((y,b)=>`<td class="${hl(a,b)?'hl':''}">${names[fn(a,b)]}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;}
 export function mountLab(root,type){
  if(['symmetry','action','representation'].includes(type)){
-  let g=[0,0];const s=shell(root,bi('点击按钮依次施加动作。r 是逆时针 90° 旋转，s 是关于水平轴的反射。','Apply actions one at a time. r rotates 90° counterclockwise; s reflects across the horizontal axis.'),`<button data-do="r">r ↶</button><button data-do="s">s ↕</button><button data-do="rs">rs</button><button data-do="sr">sr</button><button data-do="reset">${bi('复位','Reset')}</button>`);
-  const draw=()=>{
-   if(!s.stage.querySelector("svg")){
-    s.stage.innerHTML=square([0,0]);
-    if(type==='representation')s.stage.querySelector('svg').insertAdjacentHTML('beforeend',`<defs><marker id="vector-head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#b76838"/></marker></defs>${line(105,140,335,140,'#9aa78f')}${line(220,25,220,255,'#9aa78f')}<line data-vector x1="220" y1="140" x2="315" y2="140" stroke="#b76838" stroke-width="4" marker-end="url(#vector-head)"/>${circle(220,140,4,'#b76838')}${text(240,162,'0')}`);
-   }
-   s.stage.querySelectorAll("[data-vertex]").forEach(el=>{
-    const [x,y]=point(d4apply(g,Number(el.dataset.vertex)));
-    el.style.transform=`translate(${x}px,${y}px)`;
-   });
-   const a=g[0],b=g[1],c=[1,0,-1,0][a],sn=[0,1,0,-1][a];
-   if(type==='representation'){
-    const vector=s.stage.querySelector('[data-vector]');
-    vector.setAttribute('x2',220+95*c);vector.setAttribute('y2',140-95*sn);
-   }
-   s.out.innerHTML=`<div class="formula">${gname(g)} · (1,2,3,4) → (${[0,1,2,3].map(v=>d4apply(g,v)+1).join(', ')})</div>`+
-    (type==='action'?bi('顶点 1 的轨道：{1,2,3,4}。稳定子：{e,s}，8 = 4 × 2。','Orbit of vertex 1: {1,2,3,4}. Stabilizer: {e,s}, with 8 = 4 × 2.'):
-     type==='representation'?`<div class="formula">ρ(${gname(g)}) = [ ${c}, ${b?sn:-sn} ; ${sn}, ${b?-c:c} ]<br>ρ(${gname(g)})e₁ = (${c}, ${sn}) ; χ = ${c+(b?-c:c)}</div>`:
-     bi('rs 与 sr 按各自完整复合施加到当前状态；从复位状态分别试一次，比较标号。','rs and sr each apply the entire composite to the current state. Try each from reset and compare the labels.'));
-  };
-  root.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{const act=btn.dataset.do;g=act==='reset'?[0,0]:d4mul({r:[1,0],s:[0,1],rs:[1,1],sr:[3,1]}[act],g);draw();});draw();return;
+  mountSymmetryLab(root,type);return;
  }
  if(type==='cyclic'){
-  let step=0;const s=shell(root,bi('选择模数与步长，再逐步走过生成子群。','Choose a modulus and step size, then walk through the generated subgroup.'),select('n','n',[4,5,6,8,10,12],12)+select('k','k',[0,1,2,3,4,5,6,7,8,9,10,11],4)+`<button data-next>${bi('走一步','Step')}</button><button data-all>${bi('完整轨道','Full orbit')}</button>`);
-  const draw=()=>{const n=s.val('n'),k=mod(s.val('k'),n),path=orbit(n,k);s.stage.innerHTML=clock(n,k,step);s.out.innerHTML=`⟨${k}⟩ = {${path.join(', ')}} &nbsp; · &nbsp; ${bi('阶','Order')} = ${path.length} = ${n}/gcd(${n},${k})`;};root.querySelectorAll('select').forEach(e=>e.onchange=()=>{step=0;draw();});root.querySelector('[data-next]').onclick=()=>{step=(step+1)%orbit(s.val('n'),s.val('k')).length;draw();};root.querySelector('[data-all]').onclick=()=>{step=s.val('n');draw();};draw();return;
+  mountCyclicLab(root);return;
  }
  if(['cosets','quotient','ideal'].includes(type)){
   const defaults=type==='ideal'?[6,2]:[12,4];const s=shell(root,bi('每个框是一条陪集；框中的每个数都是原群（或环）的一个元素。改变生成元，观察分块。','Each box is one coset; each number is an element of the original group or ring. Change the generator to change the partition.'),select('n','n',[4,6,8,12],defaults[0])+select('k','k',[1,2,3,4,6],defaults[1]));

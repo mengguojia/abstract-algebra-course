@@ -1,0 +1,304 @@
+.story-block .experiment.cyclic-lab {
+ background: none;
+ border: 0;
+ border-radius: 0;
+ padding: 0;
+}
+
+.cyclic-lab .cyclic-controls {
+ display: flex;
+ align-items: center;
+ flex-wrap: wrap;
+ gap: 14px 24px;
+ padding: 18px 0;
+ border-top: 1px solid var(--line);
+ border-bottom: 1px solid var(--line);
+}
+
+.cyclic-lab .cyclic-controls label {
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ font-size: 13px;
+}
+
+.cyclic-lab .cyclic-controls label > span:not(.bi) {
+ font: italic 19px var(--serif);
+}
+
+.cyclic-lab .cyclic-controls select {
+ min-width: 58px;
+ padding: 7px 10px;
+}
+
+.cyclic-lab .cyclic-actions {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 8px;
+}
+
+.cyclic-lab .cyclic-actions button {
+ padding: 8px 13px;
+ font-size: 13px;
+ line-height: 1.5;
+}
+
+.cyclic-lab .cyclic-actions .cyclic-primary {
+ background: var(--green);
+ color: white;
+ border-color: var(--green);
+}
+
+.cyclic-lab .cyclic-actions button:disabled {
+ opacity: 1;
+ background: #e9eee3;
+ border-color: var(--line);
+ color: #65715e;
+}
+
+.cyclic-lab .cyclic-primary .en {
+ color: inherit;
+}
+
+.cyclic-lab .cyclic-workspace {
+ display: grid;
+ grid-template-columns: minmax(0, 1.25fr) minmax(200px, 1fr);
+ align-items: center;
+ gap: 24px;
+ padding: 22px 0;
+}
+
+.cyclic-lab .cyclic-diagram {
+ min-width: 0;
+}
+
+.cyclic-lab .cyclic-diagram svg {
+ width: 100%;
+ height: auto;
+ display: block;
+ overflow: visible;
+}
+
+.cyclic-lab .cyclic-ring {
+ fill: none;
+ stroke: var(--line);
+ stroke-width: 1.5;
+}
+
+.cyclic-lab [data-trail] path {
+ fill: none;
+ stroke: var(--green);
+ stroke-width: 2.5;
+ opacity: .5;
+}
+
+.cyclic-lab .cyclic-active-edge {
+ fill: none;
+ stroke: var(--orange);
+ stroke-width: 3.5;
+ stroke-linecap: round;
+}
+
+.cyclic-lab [data-residue] circle {
+ fill: var(--paper);
+ stroke: var(--line);
+ stroke-width: 1.5;
+}
+
+.cyclic-lab [data-residue] text {
+ fill: var(--ink);
+ font-size: 18px;
+ font-variant-numeric: tabular-nums;
+ text-anchor: middle;
+}
+
+.cyclic-lab [data-residue].is-visited circle {
+ fill: var(--green);
+ stroke: var(--green);
+}
+
+.cyclic-lab [data-residue].is-visited text {
+ fill: white;
+}
+
+.cyclic-lab [data-residue].is-target circle {
+ stroke: var(--orange);
+ stroke-width: 2;
+}
+
+.cyclic-lab .cyclic-cursor-ring {
+ fill: none;
+ stroke: var(--orange);
+ stroke-width: 2.5;
+}
+
+.cyclic-lab .cyclic-moving-dot {
+ fill: var(--orange);
+ stroke: var(--paper);
+ stroke-width: 2;
+}
+
+.cyclic-lab [hidden] {
+ display: none;
+}
+
+.cyclic-lab .cyclic-legend {
+ display: flex;
+ justify-content: center;
+ flex-wrap: wrap;
+ gap: 12px 22px;
+ color: var(--muted);
+ font-size: 12px;
+ line-height: 1.5;
+}
+
+.cyclic-lab .cyclic-legend > span {
+ display: flex;
+ align-items: center;
+ gap: 8px;
+}
+
+.cyclic-lab .cyclic-legend > span::before {
+ content: "";
+ display: block;
+ width: 10px;
+ height: 10px;
+ border-radius: 50%;
+ flex-shrink: 0;
+}
+
+.cyclic-lab .cyclic-current-key::before {
+ border: 2px solid var(--orange);
+}
+
+.cyclic-lab .cyclic-visited-key::before {
+ background: var(--green);
+}
+
+.cyclic-lab .cyclic-reading {
+ min-width: 0;
+ padding-left: 24px;
+ border-left: 1px solid var(--line);
+}
+
+.cyclic-lab .cyclic-step-count {
+ display: flex;
+ align-items: baseline;
+ gap: 12px;
+ color: var(--muted);
+ font-size: 12px;
+}
+
+.cyclic-lab .cyclic-step-count strong {
+ font: 25px/1.4 var(--serif);
+ color: var(--ink);
+}
+
+.cyclic-lab .cyclic-status {
+ display: block;
+ margin: 18px 0 25px;
+ min-height: 120px;
+}
+
+.cyclic-lab .cyclic-step-label {
+ display: block;
+ font-size: 13px;
+ color: var(--green);
+}
+
+.cyclic-lab .cyclic-equation {
+ display: block;
+ margin-top: 12px;
+ font: 27px/1.45 var(--serif);
+ color: var(--ink);
+}
+
+.cyclic-lab .cyclic-equation small {
+ font-size: 16px;
+ color: var(--muted);
+}
+
+.cyclic-lab .cyclic-route-label {
+ color: var(--muted);
+ font-size: 12px;
+}
+
+.cyclic-lab .cyclic-route {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 8px 0;
+ margin: 12px 0 20px;
+ padding: 0;
+ list-style: none;
+}
+
+.cyclic-lab .cyclic-route li {
+ display: flex;
+ align-items: center;
+ color: var(--green);
+ font: 19px/1.6 var(--serif);
+}
+
+.cyclic-lab .cyclic-route li + li::before {
+ content: "→";
+ margin: 0 9px;
+ font-size: 14px;
+ color: var(--muted);
+}
+
+.cyclic-lab .cyclic-route li.is-current {
+ color: var(--orange);
+ font-weight: bold;
+}
+
+.cyclic-lab .cyclic-conclusion {
+ border-top: 1px solid var(--line);
+ padding-top: 13px;
+ font-size: 13px;
+ line-height: 1.8;
+}
+
+.cyclic-lab .cyclic-conclusion p {
+ margin: 0 0 10px;
+}
+
+.cyclic-lab .cyclic-conclusion .cyclic-closed {
+ color: var(--green);
+}
+
+.cyclic-lab .cyclic-conclusion .cyclic-set {
+ font: 18px/1.6 var(--serif);
+ overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+ .cyclic-lab .cyclic-workspace {
+  grid-template-columns: 1fr;
+  gap: 24px;
+ }
+
+ .cyclic-lab .cyclic-diagram {
+  max-width: 420px;
+  width: 100%;
+  margin: auto;
+ }
+
+ .cyclic-lab .cyclic-reading {
+  padding: 20px 0 0;
+  border-left: 0;
+  border-top: 1px solid var(--line);
+ }
+
+ .cyclic-lab .cyclic-status {
+  min-height: 0;
+  margin: 12px 0 20px;
+ }
+
+ .cyclic-lab .cyclic-controls {
+  gap: 14px 20px;
+ }
+
+ .cyclic-lab .cyclic-actions {
+  width: 100%;
+ }
+}

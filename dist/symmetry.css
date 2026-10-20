@@ -1,0 +1,400 @@
+.hero {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 40px;
+}
+
+.hero > * {
+  min-width: 0;
+}
+
+.hero-art {
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--white);
+  text-align: left;
+}
+
+.hero-art > .eyebrow {
+  display: block;
+  margin-bottom: 18px;
+  font-size: 10px;
+  letter-spacing: 1.8px;
+}
+
+.symmetry-lab {
+  min-width: 0;
+  text-align: left;
+}
+
+.story-block .experiment.symmetry-lab {
+  padding: 26px;
+  border-radius: 14px;
+  background: var(--white);
+}
+
+.symmetry-intro h3 {
+  margin: 0 0 8px;
+  color: var(--ink);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.symmetry-lab .symmetry-intro p,
+.symmetry-lab .symmetry-note p {
+  max-width: none;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.75;
+  text-wrap: pretty;
+}
+
+.symmetry-controls {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 18px 0;
+}
+
+.symmetry-controls button {
+  display: flex;
+  min-width: 0;
+  min-height: 76px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 6px;
+  border-color: #c9d6c8;
+  background: var(--white);
+  text-align: center;
+  transition: border-color 150ms, background-color 150ms;
+}
+
+.symmetry-controls button:hover {
+  border-color: var(--green);
+  background: #edf3e6;
+}
+
+.symmetry-controls button:active {
+  background: #dfead5;
+}
+
+.symmetry-lab button:disabled {
+  opacity: 1;
+  border-color: var(--line);
+  background: #f0f1eb;
+  color: #778276;
+  cursor: wait;
+}
+
+.move-symbol {
+  display: block;
+  color: var(--green);
+  font: 25px/1.2 var(--serif);
+}
+
+.move-caption {
+  display: block;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.symmetry-lab button:disabled .move-symbol {
+  color: #778276;
+}
+
+.symmetry-lab button.playing:disabled {
+  border-color: var(--orange);
+  background: #fbf0e5;
+  color: #8e4a23;
+}
+
+.symmetry-lab button.playing:disabled .move-symbol {
+  color: var(--orange);
+}
+
+body[data-lang=both] .move-caption .bi > .en {
+  margin-top: 2px;
+  font-size: 10px;
+}
+
+.symmetry-lab .symmetry-stage {
+  display: flex;
+  min-height: 0;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #e0e6d9;
+  border-radius: 10px;
+  background: #f4f7ee;
+}
+
+.symmetry-lab .symmetry-stage svg.symmetry-diagram {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 420px;
+  max-height: none;
+  height: auto;
+  flex: 0 1 auto;
+  aspect-ratio: 440 / 320;
+}
+
+.symmetry-diagram .fixed-positions text {
+  fill: var(--muted);
+  font-size: 14px;
+}
+
+.symmetry-playback {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+}
+
+.move-status {
+  min-width: 0;
+  color: var(--green);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.symmetry-playback button {
+  flex-shrink: 0;
+  padding: 5px 12px;
+  font-size: 12px;
+}
+
+.symmetry-sequence {
+  display: flex;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.symmetry-sequence li {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 11px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.step-number {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  place-items: center;
+  margin-top: 1px;
+  border: 1px solid #b9c5b4;
+  border-radius: 50%;
+  font: 11px/1 system-ui, sans-serif;
+}
+
+.symmetry-sequence li.current {
+  border-color: #cf946d;
+  background: #fbf0e5;
+  color: #8e4a23;
+}
+
+.symmetry-sequence li.current .step-number {
+  border-color: var(--orange);
+  background: var(--orange);
+  color: white;
+}
+
+.symmetry-sequence li.done {
+  border-color: #b8ccae;
+  background: #edf3e6;
+  color: var(--green);
+}
+
+.symmetry-sequence li.done .step-number {
+  border-color: var(--green);
+  background: var(--green);
+  color: white;
+}
+
+.symmetry-lab output.symmetry-result {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px 20px;
+  min-height: 0;
+  padding: 15px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: normal;
+}
+
+.symmetry-state {
+  display: flex;
+  min-width: 64px;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.symmetry-state small {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.symmetry-state strong {
+  color: var(--green);
+  font: 28px/1.15 var(--serif);
+}
+
+.vertex-mapping {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.vertex-mapping > span {
+  padding: 7px 3px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: var(--vertex-color);
+  font: 16px/1.4 var(--serif);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.vertex-mapping > .tracked {
+  border-color: #e6cdbb;
+  background: #fbf0e5;
+  color: var(--orange);
+}
+
+.representation-readout {
+  grid-column: 1 / -1;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: var(--green);
+  font: 17px/1.7 var(--serif);
+  text-align: center;
+}
+
+.symmetry-lab .symmetry-note {
+  margin-top: 13px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.75;
+  text-wrap: pretty;
+}
+
+body[data-lang=both] .symmetry-intro .bi > .en,
+body[data-lang=both] .symmetry-note .bi > .en {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+@media (max-width: 1050px) and (min-width: 701px) {
+  .hero {
+    gap: 26px;
+  }
+
+  .hero-art {
+    padding: 19px;
+  }
+
+  .symmetry-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .hero-art {
+    width: 100%;
+    max-width: 560px;
+    padding: 20px;
+  }
+
+  .story-block .experiment.symmetry-lab {
+    padding: 20px;
+  }
+
+  .symmetry-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .symmetry-controls button {
+    min-height: 68px;
+    padding: 8px;
+  }
+
+  .symmetry-lab .symmetry-stage svg.symmetry-diagram {
+    min-width: 0;
+    flex-basis: auto;
+  }
+
+  .symmetry-lab output.symmetry-result {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .symmetry-state {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .symmetry-diagram .fixed-positions text {
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 400px) {
+  .hero-art,
+  .story-block .experiment.symmetry-lab {
+    padding: 15px;
+  }
+
+  .symmetry-lab output.symmetry-result {
+    gap: 12px;
+  }
+
+  .symmetry-sequence {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .vertex-mapping {
+    gap: 2px;
+  }
+
+  .vertex-mapping > span {
+    font-size: 14px;
+  }
+}
+
+@media print {
+  .symmetry-controls,
+  .symmetry-playback button {
+    display: none;
+  }
+
+  .symmetry-lab {
+    break-inside: avoid;
+  }
+}
