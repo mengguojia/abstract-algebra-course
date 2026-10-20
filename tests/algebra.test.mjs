@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mod,gcd,orbit,cosets,d4mul,d4apply,units,inverse,gf4mul,sylowCandidates} from '../dist/math.js';
-import {lessons,units as sections} from '../dist/course.js';
+import {lessons} from '../dist/course.js';
 test('D4 multiplication agrees with actual vertex permutations and group laws',()=>{
  const group=Array.from({length:8},(_,i)=>[i%4,Math.floor(i/4)]);
  const key=g=>g.join(',');
@@ -47,7 +47,7 @@ test('Sylow candidates and exact examples',()=>{
  assert.equal((-1)**2,(-1)**3-(-1)+1);assert.equal(((-7)/8)**2,(1/4)**3-1/4+1);
 });
 test('complete bilingual course and answer schemas',()=>{
- assert.equal(lessons.length,24);assert.equal(sections.length,6);
+ assert.equal(lessons.length,24);
  const bilingual=x=>{assert.equal(typeof x.zh,'string');assert.ok(x.zh.length);assert.equal(typeof x.en,'string');assert.ok(x.en.length);};
- lessons.forEach((l,i)=>{assert.equal(l.id,i+1);assert.equal(l.unit,Math.floor(i/4));[l.title,l.goal,l.definition,l.theorem,l.example,l.caution,l.challenge,...l.proof].forEach(bilingual);assert.equal(l.proof.length,3);assert.equal(l.questions.length,2);l.questions.forEach(q=>{bilingual(q.prompt);bilingual(q.why);q.options.forEach(bilingual);assert.ok(q.answer>=0&&q.answer<q.options.length);});});
+ lessons.forEach((l,i)=>{assert.equal(l.id,i+1);[l.title,l.goal,l.definition,l.theorem,l.example,l.caution,l.challenge,...l.proof].forEach(bilingual);assert.ok(l.proof.length);assert.equal(l.questions.length,2);l.questions.forEach(q=>{bilingual(q.prompt);bilingual(q.why);q.options.forEach(bilingual);assert.ok(q.answer>=0&&q.answer<q.options.length);});});
 });

@@ -1,5 +1,6 @@
 import {mod,gcd,orbit,cosets,d4mul,d4apply,units,inverse,gf4mul,sylowCandidates} from './math.js';
-export const bi=(zh,en)=>`<span class="bi"><span class="zh">${zh}</span><span class="en">${en}</span></span>`;
+export const htmlText=value=>value.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+export const bi=(zh,en)=>`<span class="bi"><span class="zh" lang="zh-CN">${htmlText(zh)}</span><span class="en" lang="en">${htmlText(en)}</span></span>`;
 const options=(values,current)=>values.map(v=>`<option value="${v}" ${v===current?'selected':''}>${v}</option>`).join('');
 const select=(id,label,values,current)=>`<label>${label} <select data-control="${id}">${options(values,current)}</select></label>`;
 const svg=(content,label='Mathematical diagram')=>`<svg viewBox="0 0 440 280" role="img" aria-label="${label}">${content}</svg>`;
@@ -16,7 +17,25 @@ function table(n,fn,hl=()=>false,names=Array.from({length:n},(_,i)=>i)){return `
 export function mountLab(root,type){
  if(['symmetry','action','representation'].includes(type)){
   let g=[0,0];const s=shell(root,bi('点击按钮依次施加动作。r 是逆时针 90° 旋转，s 是关于水平轴的反射。','Apply actions one at a time. r rotates 90° counterclockwise; s reflects across the horizontal axis.'),`<button data-do="r">r ↶</button><button data-do="s">s ↕</button><button data-do="rs">rs</button><button data-do="sr">sr</button><button data-do="reset">${bi('复位','Reset')}</button>`);
-  const draw=()=>{if(!s.stage.querySelector("svg"))s.stage.innerHTML=square([0,0]);s.stage.querySelectorAll("[data-vertex]").forEach(el=>{const [x,y]=point(d4apply(g,Number(el.dataset.vertex)));el.style.transform=`translate(${x}px,${y}px)`;});const a=g[0],b=g[1],c=[1,0,-1,0][a],sn=[0,1,0,-1][a];s.out.innerHTML=`<div class="formula">${gname(g)} · (1,2,3,4) → (${[0,1,2,3].map(v=>d4apply(g,v)+1).join(', ')})</div>`+(type==='action'?bi('顶点 1 的轨道：{1,2,3,4}。稳定子：{e,s}，8 = 4 × 2。','Orbit of vertex 1: {1,2,3,4}. Stabilizer: {e,s}, with 8 = 4 × 2.'):type==='representation'?`<div class="formula">ρ(${gname(g)}) = [ ${c}, ${b?sn:-sn} ; ${sn}, ${b?-c:c} ] &nbsp; χ = ${c+(b?-c:c)}</div>`:bi('rs 与 sr 按各自完整复合施加到当前状态；从复位状态分别试一次，比较标号。','rs and sr each apply the entire composite to the current state. Try each from reset and compare the labels.'));};
+  const draw=()=>{
+   if(!s.stage.querySelector("svg")){
+    s.stage.innerHTML=square([0,0]);
+    if(type==='representation')s.stage.querySelector('svg').insertAdjacentHTML('beforeend',`<defs><marker id="vector-head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#b76838"/></marker></defs>${line(105,140,335,140,'#9aa78f')}${line(220,25,220,255,'#9aa78f')}<line data-vector x1="220" y1="140" x2="315" y2="140" stroke="#b76838" stroke-width="4" marker-end="url(#vector-head)"/>${circle(220,140,4,'#b76838')}${text(240,162,'0')}`);
+   }
+   s.stage.querySelectorAll("[data-vertex]").forEach(el=>{
+    const [x,y]=point(d4apply(g,Number(el.dataset.vertex)));
+    el.style.transform=`translate(${x}px,${y}px)`;
+   });
+   const a=g[0],b=g[1],c=[1,0,-1,0][a],sn=[0,1,0,-1][a];
+   if(type==='representation'){
+    const vector=s.stage.querySelector('[data-vector]');
+    vector.setAttribute('x2',220+95*c);vector.setAttribute('y2',140-95*sn);
+   }
+   s.out.innerHTML=`<div class="formula">${gname(g)} · (1,2,3,4) → (${[0,1,2,3].map(v=>d4apply(g,v)+1).join(', ')})</div>`+
+    (type==='action'?bi('顶点 1 的轨道：{1,2,3,4}。稳定子：{e,s}，8 = 4 × 2。','Orbit of vertex 1: {1,2,3,4}. Stabilizer: {e,s}, with 8 = 4 × 2.'):
+     type==='representation'?`<div class="formula">ρ(${gname(g)}) = [ ${c}, ${b?sn:-sn} ; ${sn}, ${b?-c:c} ]<br>ρ(${gname(g)})e₁ = (${c}, ${sn}) ; χ = ${c+(b?-c:c)}</div>`:
+     bi('rs 与 sr 按各自完整复合施加到当前状态；从复位状态分别试一次，比较标号。','rs and sr each apply the entire composite to the current state. Try each from reset and compare the labels.'));
+  };
   root.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{const act=btn.dataset.do;g=act==='reset'?[0,0]:d4mul({r:[1,0],s:[0,1],rs:[1,1],sr:[3,1]}[act],g);draw();});draw();return;
  }
  if(type==='cyclic'){
@@ -49,8 +68,22 @@ export function mountLab(root,type){
   const s=shell(root,bi('在基 {1,√2} 下，每个有理系数对代表 a+b√2。选择系数并观察平方。','In the basis {1,√2}, each rational coefficient pair represents a+b√2. Choose coefficients and inspect its square.'),select('a','a',[-3,-2,-1,0,1,2,3],1)+select('b','b',[-3,-2,-1,0,1,2,3],1));const draw=()=>{const a=s.val('a'),b=s.val('b');s.stage.innerHTML=svg(line(50,220,390,220)+line(220,260,220,20)+line(220,220,220+a*42,220-b*42,'#28634c')+circle(220+a*42,220-b*42,9)+text(390,245,'1')+text(245,25,'√2')+text(220+a*42,200-b*42,`(${a}, ${b})`));s.out.innerHTML=`(${a} + (${b})√2)² = ${a*a+2*b*b} + (${2*a*b})√2`+`<p class="small">${bi('坐标表示基系数；不把所有实系数对算作 ℚ(√2) 的元素。','Coordinates are basis coefficients; arbitrary real coefficient pairs are not elements of ℚ(√2).')}</p>`;};root.querySelectorAll('select').forEach(e=>e.onchange=draw);draw();return;
  }
  if(type==='galois'){
-  const pairs=[['{e}','ℚ(√2,√3)',4,1],['⟨flip √3⟩','ℚ(√2)',2,2],['⟨flip √2⟩','ℚ(√3)',2,2],['⟨flip both⟩','ℚ(√6)',2,2],['C₂ × C₂','ℚ',1,4]];
-  const s=shell(root,bi('选择子群，观察对应固定域与扩张次数。上方是顶域，下方是基域。','Select a subgroup to inspect its fixed field and degrees. The extension field is above the base field.'),`<label>H <select data-control="h">${pairs.map((p,i)=>`<option value="${i}">${p[0]}</option>`).join('')}</select></label>`);const draw=()=>{const k=s.val('h'),pts=[[220,30],[75,140],[220,140],[365,140],[220,250]];s.stage.innerHTML=svg([1,2,3].map(i=>line(...pts[0],...pts[i])+line(...pts[i],...pts[4])).join('')+pts.map(([x,y],i)=>`<rect x="${x-69}" y="${y-20}" width="138" height="40" rx="7" fill="${i===k?'#28634c':'#fffef9'}"/>`+text(x,y+5,pairs[i][1],i===k?'#fff':'#20362f',13)).join(''));const p=pairs[k];s.out.innerHTML=`H = ${p[0]} ↔ Eᴴ = ${p[1]}<br>[E:Eᴴ] = |H| = ${p[3]} ; [Eᴴ:ℚ] = ${p[2]}`;};root.querySelector('select').onchange=draw;draw();return;
+  const pairs=[['{e}','ℚ(√2,√3)',4,1],['⟨σ₃⟩','ℚ(√2)',2,2],['⟨σ₂⟩','ℚ(√3)',2,2],['⟨σ₂σ₃⟩','ℚ(√6)',2,2],['G','ℚ',1,4]];
+  const s=shell(root,bi('左图是子群，右图是中间域；两边都把较大的对象放在上方。σ₂ 只改变 √2 的符号，σ₃ 只改变 √3 的符号。选择子群，看固定域如何反向移动。','Subgroups are on the left and intermediate fields on the right, with larger objects above smaller ones. σ₂ flips only √2; σ₃ flips only √3. Select a subgroup and follow the reversed correspondence.'),`<label>H <select data-control="h">${pairs.map((p,i)=>`<option value="${i}">${p[0]}</option>`).join('')}</select></label>`);
+  const draw=()=>{
+   const k=s.val('h');
+   const left=[[190,255],[70,145],[190,145],[310,145],[190,35]];
+   const right=[[690,35],[560,145],[690,145],[820,145],[690,255]];
+   const lattice=(pts,column)=>[1,2,3].map(i=>line(...pts[0],...pts[i])+line(...pts[i],...pts[4])).join('')+pts.map(([x,y],i)=>`<rect x="${x-57}" y="${y-20}" width="114" height="40" rx="5" fill="${i===k?'#28634c':'#fffef9'}" stroke="#c4cfba"/>`+text(x,y+5,pairs[i][column],i===k?'white':'#20362f',13)).join('');
+   const [lx,ly]=left[k], [rx,ry]=right[k];
+   s.stage.innerHTML=`<div class="diagram-scroll"><svg class="galois-pair" viewBox="0 0 900 290" role="img" aria-label="Subgroups and fixed fields / 子群与固定域">
+    <path d="M ${lx+57},${ly} C 430,${ly} 440,${ry} ${rx-57},${ry}" stroke="#b76838" stroke-width="2" stroke-dasharray="6 5" fill="none"/>
+    ${lattice(left,0)}${lattice(right,1)}
+   </svg></div>`;
+   const p=pairs[k];
+   s.out.innerHTML=`H = ${p[0]} ↔ Eᴴ = ${p[1]}<br>[E:Eᴴ] = |H| = ${p[3]} ; [Eᴴ:ℚ] = ${p[2]}`;
+  };
+  root.querySelector('select').onchange=draw;draw();return;
  }
  if(type==='solvable'){
   const chains=[['S₃','A₃','{e}'],['S₅','A₅','A₅']];let step=0;const s=shell(root,bi('计算导出列的已知结构。每走一步，取当前群的导出子群。','Follow the known derived series. Each step takes the derived subgroup of the current group.'),select('group',bi('选择群（0=S₃，1=S₅）','Group (0=S₃, 1=S₅)'),[0,1],0)+`<button data-step>${bi('下一步','Next step')}</button>`);const draw=()=>{const g=s.val('group');s.stage.innerHTML=`<div class="formula">${chains[g].slice(0,step+1).map((x,i)=>pill(x,i===step)).join(' → ')}</div>`;s.out.innerHTML=step===2?bi(g?'A₅ 是非交换简单群，导出列停在 A₅：不可解。':'到达平凡群：S₃ 可解。',g?'A₅ is nonabelian simple. The series stays at A₅: not solvable.':'The series reaches the trivial group: S₃ is solvable.'):`G⁽${step}⁾ = ${chains[g][step]}`;root.querySelector('button').disabled=step===2;};root.querySelector('select').onchange=()=>{step=0;draw();};root.querySelector('button').onclick=()=>{step++;draw();};draw();return;

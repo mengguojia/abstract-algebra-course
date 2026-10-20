@@ -1,40 +1,244 @@
-import {lessons,units,sources} from './course.js';
+import {lessons,sources} from './course.js';
+import {chapters,chapterFor} from './syllabus.js';
+import {plans1} from './lesson-plans-1.js';
+import {plans2} from './lesson-plans-2.js';
+import {renderLessonStory} from './lesson-renderer.js';
 import {bi,mountLab} from './widgets.js';
-const app=document.querySelector('#app');
-const t=x=>bi(x.zh,x.en);
-const saved=localStorage.getItem('algebra-progress-v1');
-const progress=saved===null?{}:JSON.parse(saved);
-let language=localStorage.getItem('algebra-language')||'zh';
-const completed=id=>lessons[id-1].questions.every((_,i)=>progress[`${id}.${i}`]);
-const count=()=>Object.keys(progress).length;
-function setLanguage(lang){language=lang;document.body.dataset.lang=lang;document.documentElement.lang=lang==='en'?'en':'zh-CN';localStorage.setItem('algebra-language',lang);document.querySelectorAll('[data-language]').forEach(b=>{b.classList.toggle('active',b.dataset.language===lang);b.setAttribute('aria-pressed',b.dataset.language===lang);});}
-document.querySelectorAll('[data-language]').forEach(btn=>btn.onclick=()=>setLanguage(btn.dataset.language));
-setLanguage(language);
-const lessonCard=l=>`<a class="lesson-card" href="#lesson/${l.id}"><span class="number">LESSON ${String(l.id).padStart(2,'0')} <span>${completed(l.id)?'✓':''}</span></span><h4>${t(l.title)}</h4><p>${t(l.goal)}</p><span class="card-bottom">${bi('实验 · 推理 · 自测','Explore · reason · practice')} <span>↗</span></span></a>`;
-function home(){
- app.innerHTML=`<main id="main"><section class="hero"><div><div class="eyebrow">AN INTERACTIVE JOURNEY / 01—24</div><h1>${bi('从看见对称，<br>到理解<em>抽象代数。</em>','From seeing symmetry<br>to understanding <em>algebra.</em>')}</h1><p>${bi('转动一个正方形，拆开一个群，构造一个新的数。让抽象的定义变成可以亲手探索的结构。','Rotate a square. Take a group apart. Construct a new number. Turn abstract definitions into structures you can explore.')}</p><div class="actions"><a class="button primary" id="continue" href="#lesson/${lessons.find(l=>!completed(l.id))?.id||1}">${bi(count()?'继续学习':'开启第一课',count()?'Continue learning':'Begin the journey')} →</a><a class="button" href="#map">${bi('查看知识地图','Explore the map')} ↗</a></div><div class="stats"><div><strong>24</strong><span>${bi('循序渐进的课程','Step-by-step lessons')}</span></div><div><strong>24</strong><span>${bi('可操作的实验','Interactive experiments')}</span></div><div><strong>48</strong><span>${bi('即时反馈自测','Practice questions')}</span></div></div></div><div class="hero-art"><span class="eyebrow">THE SYMMETRY LAB · D₄</span><div id="hero-lab"></div></div></section><section id="curriculum"><div class="section-head"><div><div class="eyebrow">YOUR LEARNING PATH</div><h2>${bi('一步一步，建立全景。','Build the big picture, one step at a time.')}</h2><p>${bi('先修：集合、函数、整数算术。线性代数概念在用到时引入。','Prerequisites: sets, functions, and integer arithmetic. Linear algebra is introduced as needed.')}</p></div><div><span class="small">${count()} / 48 ${bi('题已掌握','solved')}</span><div class="progress"><i style="width:${count()/48*100}%"></i></div></div></div><div class="route">${units.map((u,i)=>`<a href="#unit-${i}"><span>0${i+1} →</span>${t(u)}</a>`).join('')}</div><div class="filter"><input id="search" type="search" aria-label="搜索课程 / Search lessons" placeholder="搜索课程 / Search lessons…"><span class="small" id="search-count"></span></div><div id="course-list"></div></section><section class="banner"><div><span class="eyebrow" style="color:#c2d9a3">BEYOND THE FOUNDATIONS</span><h2>${bi('理论的尽头，是新的问题。','Every theory opens a new question.')}</h2><p>${bi('从逆伽罗瓦问题到 BSD 猜想，了解代数为什么仍在生长。','From inverse Galois to BSD, discover why algebra is still growing.')}</p></div><a href="#lesson/22" class="button">${bi('走向研究前沿','Explore the frontiers')} ↗</a></section></main>`;
- mountLab(document.querySelector('#hero-lab'),'symmetry');
- const renderList=()=>{const query=document.querySelector('#search').value.trim().toLowerCase();const found=lessons.filter(l=>[l.title.zh,l.title.en,l.goal.zh,l.goal.en,l.id.toString()].some(v=>v.toLowerCase().includes(query)));document.querySelector('#course-list').innerHTML=found.length?units.map((u,i)=>{const ls=found.filter(l=>l.unit===i);return ls.length?`<section class="unit" id="unit-${i}"><div class="unit-heading"><span class="unit-num">0${i+1}</span><div><h3>${t(u)}</h3><p>${bi('第','Lessons ')} ${i*4+1}–${i*4+4} ${bi('课','')}</p></div></div><div class="cards">${ls.map(lessonCard).join('')}</div></section>`:'';}).join(''):`<p class="empty">${bi('没有匹配的课程。试试“群”“Galois”或“模”。','No matching lessons. Try “group”, “Galois”, or “module”.')}</p>`;document.querySelector('#search-count').innerHTML=`${found.length} / 24`;};document.querySelector('#search').oninput=renderList;renderList();
-}
-function lesson(id){
- const l=lessons[id-1];
- app.innerHTML=`<div class="layout"><aside class="sidebar" aria-label="课程目录 / Course navigation"><a href="#home">← ${bi('全部课程','All lessons')}</a>${units.map((u,i)=>`<h3>0${i+1} · ${t(u)}</h3>${lessons.filter(x=>x.unit===i).map(x=>`<a href="#lesson/${x.id}" class="${x.id===id?'active':''}" ${x.id===id?'aria-current="page"':''}>${String(x.id).padStart(2,'0')} ${t(x.title)} <span data-status="${x.id}">${completed(x.id)?'✓':''}</span></a>`).join('')}`).join('')}</aside><main id="main" class="lesson-main"><div class="breadcrumbs"><a href="#home">${bi('课程','Course')}</a> / ${t(units[l.unit])}</div><p class="eyebrow">LESSON ${String(id).padStart(2,'0')} OF 24</p><h1 class="lesson-title">${t(l.title)}</h1><p class="lead">${t(l.goal)}</p><p class="small">${bi('建议先修','Suggested prerequisite')}: ${id===1?bi('集合、函数与整数算术','Sets, functions, integer arithmetic'):`<a href="#lesson/${id-1}">${id-1} · ${t(lessons[id-2].title)}</a>`}</p><nav class="lesson-tabs"><a href="#explore">01 ${bi('动手实验','Explore')}</a><a href="#define">02 ${bi('定义与定理','Define')}</a><a href="#reason">03 ${bi('逐步推理','Reason')}</a><a href="#practice">04 ${bi('检验理解','Practice')}</a></nav><section id="explore" class="lesson-section"><h2>${bi('先动手，再抽象。','Explore before abstracting.')}</h2><div class="experiment" id="lesson-lab"></div></section><section id="define" class="lesson-section"><h2>${bi('给直觉一个精确的名字。','Give intuition a precise name.')}</h2><div class="panel definition"><span class="tag">${bi('定义 / 约定','DEFINITION / CONVENTION')}</span><p>${t(l.definition)}</p><div class="formula">${l.formula}</div></div><div class="panel theorem"><span class="tag">${bi('核心结论','KEY RESULT')}</span><p>${t(l.theorem)}</p></div><p class="note">${t(l.caution)}</p></section><section id="reason" class="lesson-section"><h2>${bi('让每一步都有理由。','Make every step count.')}</h2><div class="panel"><span class="tag">${bi('分步论证','STEP-BY-STEP ARGUMENT')}</span><ol class="proof-list">${l.proof.map((s,i)=>`<li ${i?'hidden':''}>${t(s)}</li>`).join('')}</ol><div class="actions"><button id="proof-next">${bi('展开下一步','Reveal next step')} →</button><button id="proof-all">${bi('完整论证','Show all')}</button></div></div><div class="panel"><span class="tag">${bi('具体例子','WORKED EXAMPLE')}</span><p>${t(l.example)}</p></div></section><section id="practice" class="lesson-section"><h2>${bi('轮到你来判断。','Now put it to the test.')}</h2><p class="small">${bi('答对后自动保存进度。查看拓展题不计入答题进度。','Correct answers are saved automatically. Reading the extension exercise does not count as solving a question.')}</p><div class="panel">${l.questions.map((q,i)=>`<div class="quiz" data-quiz="${i}"><span class="tag">CHECK ${i+1} <span data-solved>${progress[`${id}.${i}`]?'✓':''}</span></span><h3>${t(q.prompt)}</h3><div class="quiz-options">${q.options.map((o,j)=>`<button data-answer="${j}">${String.fromCharCode(65+j)}. ${t(o)}</button>`).join('')}</div><div class="feedback" role="status" aria-live="polite"></div></div>`).join('')}</div><details class="panel"><summary>${bi('拓展练习与解题线索','Extension exercise and solution guidance')}</summary><p>${t(l.challenge)}</p></details></section><section class="lesson-section"><p class="small">${bi('延伸阅读','Further reading')}: <a href="#sources">${id<=8?'Milne · Group Theory':id<=12?'Judson · Abstract Algebra':id<=16?'Milne · Fields and Galois Theory':id===21?'Milne · Algebraic Geometry':id===22?'Conrad · Galois Correspondence':id===23?'Clay · BSD':'Judson / Milne / AIM'} ↗</a></p></section><div class="next-lesson">${id>1?`<a class="button" href="#lesson/${id-1}">← ${bi('上一课','Previous')}</a>`:'<span></span>'}${id<24?`<a class="button primary" href="#lesson/${id+1}">${bi('下一课','Next lesson')} →</a>`:`<a class="button primary" href="#map">${bi('回到知识地图','Return to the map')} →</a>`}</div></main></div>`;
- mountLab(document.querySelector('#lesson-lab'),l.lab);
- const steps=[...document.querySelectorAll('.proof-list li')];let shown=1;const show=all=>{shown=all?steps.length:shown+1;steps.forEach((el,i)=>el.hidden=i>=shown);document.querySelector('#proof-next').disabled=shown===steps.length;};document.querySelector('#proof-next').onclick=()=>show(false);document.querySelector('#proof-all').onclick=()=>show(true);
- document.querySelectorAll('[data-quiz]').forEach(box=>{const i=Number(box.dataset.quiz),q=l.questions[i];box.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{const correct=Number(btn.dataset.answer)===q.answer;box.querySelectorAll('button').forEach(x=>x.classList.toggle('selected',x===btn));const feedback=box.querySelector('.feedback');feedback.className=`feedback ${correct?'correct':'incorrect'}`;feedback.innerHTML=(correct?bi('✓ 正确。','✓ Correct.'):bi('再想一想。','Think it through.'))+' '+t(q.why);if(correct){progress[`${id}.${i}`]=true;localStorage.setItem('algebra-progress-v1',JSON.stringify(progress));box.querySelector('[data-solved]').textContent='✓';document.querySelector(`[data-status="${id}"]`).textContent=completed(id)?'✓':'';}});});
-}
-function map(){app.innerHTML=`<main id="main"><div class="eyebrow">THE ALGEBRA LANDSCAPE</div><h1 class="lesson-title">${bi('同一套思想，不同的世界。','Shared ideas. Different worlds.')}</h1><p class="lead">${bi('先沿主线建立共同语言，再选择你想深入的问题。箭头表示学习依赖，不表示所有概念都构成包含关系。','Follow the main path to build a shared language, then choose the questions you want to explore. Arrows indicate learning dependencies, not set inclusions.')}</p><div class="route">${units.map((u,i)=>`<a href="#lesson/${i*4+1}"><span>0${i+1} →</span>${t(u)}</a>`).join('')}</div><div class="map-grid">${[
- ['对称与分类','Symmetry and classification','群 → 作用 → 西罗定理 → 表示论','Groups → actions → Sylow → representations','下一步：特征标、简单群、李群与李代数。','Next: characters, simple groups, Lie groups and Lie algebras.',19],
- ['方程与新数','Equations and new numbers','环 → 多项式 → 域扩张 → 伽罗瓦理论','Rings → polynomials → extensions → Galois','研究问题：哪些有限群能在 ℚ 上实现？','Research question: which finite groups can be realized over ℚ?',22],
- ['几何的代数语言','The algebra of geometry','理想 → 商环 → 代数簇 → 概形','Ideals → quotient rings → varieties → schemes','下一步：素理想、局部化、诺特环与维数。','Next: prime ideals, localization, Noetherian rings and dimension.',21],
- ['线性与同调','Linear and homological methods','模 → 正合列 → 导出函子','Modules → exact sequences → derived functors','下一步：张量积、Hom、Ext 与 Tor。','Next: tensor products, Hom, Ext and Tor.',17],
- ['算术几何','Arithmetic geometry','数域 → 椭圆曲线 → 有理点','Number fields → elliptic curves → rational points','研究问题：BSD 如何把群的秩与 L 函数联系起来？','Research question: how does BSD connect rank to an L-function?',23],
- ['几何群论','Geometric group theory','生成元 → 凯莱图 → 群的几何','Generators → Cayley graphs → geometry of groups','下一步：自由群、群表示式、双曲群。AIM 清单提供当前研究问题。','Next: free groups, presentations and hyperbolic groups. AIM lists current research problems.',7]
- ].map(([zh,en,pathZh,pathEn,descZh,descEn,id])=>`<article class="map-item"><span class="tag">${bi('学习路线','STUDY ROUTE')}</span><h2>${bi(zh,en)}</h2><p>${bi(pathZh,pathEn)}</p><p>${bi(descZh,descEn)}</p><a href="#lesson/${id}">${bi('进入相关课程','Open related lesson')} →</a></article>`).join('')}</div><div class="panel"><h2>${bi('结构层级','A hierarchy of structures')}</h2><div class="formula">${bi('域 ⇒ 欧几里得整环 ⇒ PID ⇒ UFD ⇒ 整环 ⇒ 交换环','Field ⇒ Euclidean domain ⇒ PID ⇒ UFD ⇒ integral domain ⇒ commutative ring')}</div><p>${bi('每个箭头表示左边满足右边的公理，逆向一般不成立。环的加法群是阿贝尔群；域的非零元素在乘法下成群；域上的模是向量空间。','Each arrow asserts that the left-hand structure satisfies the right-hand axioms; the converses fail in general. A ring’s additive group is abelian; nonzero field elements form a multiplicative group; modules over a field are vector spaces.')}</p></div><a class="button" href="#sources">${bi('阅读资料与研究问题来源','Readings and research sources')} ↗</a></main>`;}
-function sourcePage(){app.innerHTML=`<main id="main"><div class="eyebrow">READING ROOM</div><h1 class="lesson-title">${bi('参考资料与数学约定','References and mathematical conventions')}</h1><div class="panel"><h2>${bi('如何使用这门课','How to use this course')}</h2><p>${bi('每课按实验、定义、论证、自测展开。前 20 课建立本科抽象代数主线；最后 4 课提供现代方向的入门桥梁。西罗、伽罗瓦基本定理、根式可解判据、结构定理等长定理在相应课中明确区分定理陈述与所展示的应用论证。','Each lesson proceeds through exploration, definitions, reasoning, and practice. The first 20 lessons build an undergraduate algebra core; the final four bridge to modern directions. For longer results such as Sylow, the fundamental theorem of Galois theory, the radical-solvability criterion, and structure theorems, each lesson distinguishes the theorem statement from its worked application.')}</p><p>${bi('环默认含 1，环同态保持 1。域满足 1≠0。D₄ 表示 8 阶正方形对称群。函数复合 fg 从右向左作用。所有有限实验都使用精确整数运算；曲线图用于展示实几何。','Rings have 1 and ring homomorphisms preserve 1. Fields satisfy 1≠0. D₄ denotes the order-8 square symmetry group. Composition fg acts right to left. Finite experiments use exact integer arithmetic; curve plots illustrate real geometry.')}</p></div><ol class="source-list">${sources.map(([name,url])=>`<li><a href="${url}" target="_blank" rel="noreferrer">${name} ↗</a></li>`).join('')}</ol><div class="panel"><h2>${bi('来源与进度','Sources and progress')}</h2><p>${bi('网站的模块化课程、双语切换、交互练习和本地进度机制参考 cbwang2016/logic-course。本站文字与代码独立编写。开放问题来源核对日期：2026-10-20。','The modular course, language controls, interactive practice, and local progress are inspired by cbwang2016/logic-course. This site’s prose and code are independently authored. Open-problem references checked on 2026-10-20.')}</p><p>${bi('学习记录只存储在当前浏览器、当前站点地址下。答对两道自测后，该课显示完成标记。','Progress is stored in this browser under this site address. A lesson is marked complete after both questions are answered correctly.')}</p><p>${count()} / 48 ${bi('题已掌握','questions solved')}</p><button id="reset-progress">${bi('清空学习进度','Clear learning progress')}</button><span id="reset-message" role="status"></span></div></main>`;document.querySelector('#reset-progress').onclick=()=>{Object.keys(progress).forEach(k=>delete progress[k]);localStorage.removeItem('algebra-progress-v1');sourcePage();document.querySelector('#reset-message').innerHTML=bi(' 已清空。',' Progress cleared.');};}
-const sectionAnchors=new Set(['main','explore','define','reason','practice',...units.map((_,i)=>`unit-${i}`)]);
-document.addEventListener('click',event=>{const link=event.target.closest('a');if(link && sectionAnchors.has(link.getAttribute('href')?.slice(1))){event.preventDefault();document.getElementById(link.getAttribute('href').slice(1)).scrollIntoView();}});
-function render(){const hash=location.hash.slice(1)||'home';if(sectionAnchors.has(hash) && document.getElementById(hash)){document.getElementById(hash)?.scrollIntoView();return;}let page='home';if(/^lesson\/(?:[1-9]|1\d|2[0-4])$/.test(hash)){lesson(Number(hash.split('/')[1]));page='lesson';}else if(hash==='map'){map();page='map';}else if(hash==='sources'){sourcePage();page='sources';}else if(hash==='home'){home();}else{app.innerHTML=`<main id="main"><h1>${bi('课程地址不存在','Lesson not found')}</h1><a class="button" href="#home">${bi('回到全部课程','Return to all lessons')}</a></main>`;}
- document.querySelector('#topnav').innerHTML=[['home','课程','Course'],['map','知识地图','Knowledge map'],['sources','阅读室','Reading room']].map(([r,zh,en])=>`<a href="#${r}" class="${r===page||(r==='home'&&page==='lesson')?'active':''}">${bi(zh,en)}</a>`).join('');document.title=page==='lesson'?`${lessons[Number(hash.split('/')[1])-1].title.zh} · Algebra Atlas`:'结构之旅 · Algebra Atlas';window.scrollTo(0,0);}
-window.addEventListener('hashchange',render);render();
 
+const plans = {...plans1,...plans2};
+const app = document.querySelector('#app');
+const t = value => bi(value.zh,value.en);
+const saved = localStorage.getItem('algebra-progress-v1');
+const progress = saved === null ? {} : JSON.parse(saved);
+const totalQuestions = lessons.reduce((sum,lesson)=>sum+lesson.questions.length,0);
+const completed = id => lessons[id-1].questions.every((_,i)=>progress[`${id}.${i}`]);
+const solvedCount = () => lessons.reduce((sum,l)=>sum+l.questions.filter((_,i)=>progress[`${l.id}.${i}`]).length,0);
+const lessonLink = id => `<a href="#lesson/${id}">${t(lessons[id-1].title)}</a>`;
+const dependents = id => lessons.filter(l=>plans[l.id].prerequisites.includes(id));
+
+function setLanguage(lang) {
+  document.body.dataset.lang = lang;
+  document.documentElement.lang = lang === 'en' ? 'en' : 'zh-CN';
+  localStorage.setItem('algebra-language',lang);
+  document.querySelectorAll('[data-language]').forEach(button=>{
+    const selected = button.dataset.language === lang;
+    button.classList.toggle('active',selected);
+    button.setAttribute('aria-pressed',selected);
+  });
+}
+document.querySelectorAll('[data-language]').forEach(button=>{
+  button.onclick = () => setLanguage(button.dataset.language);
+});
+setLanguage(localStorage.getItem('algebra-language') || 'zh');
+
+function lessonCard(lesson) {
+  return `<a class="lesson-card" href="#lesson/${lesson.id}">
+    <span class="number">${String(lesson.id).padStart(2,'0')} <span>${completed(lesson.id) ? '✓' : ''}</span></span>
+    <h4>${t(lesson.title)}</h4><p>${t(plans[lesson.id].question)}</p>
+    <span class="card-bottom">${bi('进入这个问题','Explore this question')} <span>↗</span></span>
+  </a>`;
+}
+
+function home() {
+  const next = lessons.find(l=>!completed(l.id));
+  app.innerHTML = `<main id="main">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">ALGEBRA THROUGH QUESTIONS</div>
+        <h1>${bi('从具体的问题，','From concrete questions')}<br><em>${bi('走进抽象代数。','into abstract algebra.')}</em></h1>
+        <p>${bi('加法与旋转共享什么？为什么可以把一组元素当作一个数？方程的对称性又如何决定求根？沿着问题之间的联系，建立代数的全景。','What do addition and rotation share? When can a whole class of elements act as one number? How does symmetry constrain roots? Follow the connections between questions to see algebra as a whole.')}</p>
+        <div class="actions">
+          <a class="button primary" href="#outline">${bi('先看课程大纲','Start with the course outline')} →</a>
+          <a class="button" id="continue" href="#lesson/${next ? next.id : 1}">${bi(solvedCount() ? '继续学习' : '进入第一课',solvedCount() ? 'Continue learning' : 'Open the first lesson')} ↗</a>
+        </div>
+        <div class="stats">
+          <div><strong>6</strong><span>${bi('相互衔接的部分','Connected chapters')}</span></div>
+          <div><strong>${lessons.length}</strong><span>${bi('具体问题','Concrete questions')}</span></div>
+          <div><strong>中 / EN</strong><span>${bi('双语学习','Bilingual learning')}</span></div>
+        </div>
+      </div>
+      <div class="hero-art"><span class="eyebrow">A FIRST QUESTION · D₄</span><div id="hero-lab"></div></div>
+    </section>
+    <section id="curriculum">
+      <div class="section-head">
+        <div><div class="eyebrow">FOLLOW THE IDEAS</div><h2>${bi('问题之间，有一条线。','There is a thread between the questions.')}</h2>
+          <p>${bi('共同主干建立语言，专题拓展方法，前沿导览提出下一步问题。','The core builds a language, specialist topics extend its methods, and frontiers reveal the next questions.')}</p>
+        </div>
+        <div><span class="small">${solvedCount()} / ${totalQuestions} ${bi('题已掌握','solved')}</span><div class="progress"><i style="width:${solvedCount()/totalQuestions*100}%"></i></div></div>
+      </div>
+      <div class="filter"><input id="search" type="search" aria-label="搜索课程 / Search lessons" placeholder="搜索问题或概念 / Search questions or concepts…"><span class="small" id="search-count"></span></div>
+      <div id="course-list"></div>
+    </section>
+    <section class="banner"><div><span class="eyebrow" style="color:#c2d9a3">CHOOSE YOUR NEXT QUESTION</span>
+      <h2>${bi('对称、方程，还是几何？','Symmetry, equations, or geometry?')}</h2>
+      <p>${bi('知识关系图标明每课的先修与后续去向。你可以沿主线学习，也可以从一个问题回溯所需工具。','The dependency map identifies prerequisites and destinations. Follow the core or work backward from a question to the tools it needs.')}</p>
+    </div><a class="button" href="#map">${bi('查看知识关系','See the connections')} ↗</a></section>
+  </main>`;
+  mountLab(document.querySelector('#hero-lab'),'symmetry');
+  const renderList = () => {
+    const query = document.querySelector('#search').value.trim().toLowerCase();
+    const found = lessons.filter(l=>[l.title.zh,l.title.en,plans[l.id].question.zh,plans[l.id].question.en,String(l.id)].some(value=>value.toLowerCase().includes(query)));
+    document.querySelector('#course-list').innerHTML = found.length
+      ? chapters.map((chapter,i)=>{
+        const items = found.filter(l=>chapter.lessons.includes(l.id));
+        return items.length ? `<section class="unit" id="unit-${i}">
+          <div class="unit-heading"><span class="unit-num">0${i+1}</span><div><h3>${t(chapter.title)}</h3><p class="chapter-question-preview">${t(chapter.question)}</p></div></div>
+          <div class="cards">${items.map(lessonCard).join('')}</div>
+        </section>` : '';
+      }).join('')
+      : `<p class="empty">${bi('没有匹配的课程。试试“群”“Galois”或“模”。','No matching lessons. Try “group”, “Galois”, or “module”.')}</p>`;
+    document.querySelector('#search-count').textContent = `${found.length} / ${lessons.length}`;
+  };
+  document.querySelector('#search').oninput = renderList;
+  renderList();
+}
+
+function outline() {
+  app.innerHTML = `<main id="main" class="outline-page">
+    <div class="eyebrow">COURSE OUTLINE</div><h1 class="lesson-title">${bi('先看问题如何连在一起。','First, see how the questions connect.')}</h1>
+    <p class="lead">${bi('课程从集合、函数与整数算术出发。六部分沿着“运算 → 结构 → 构造 → 对称 → 统一 → 研究”的线索展开；每课的内容顺序由它要回答的问题决定。','Begin with sets, functions, and integer arithmetic. Six chapters follow operations → structures → constructions → symmetries → unifying methods → research. Each lesson follows the argument needed to answer its question.')}</p>
+    <div class="course-spine">${chapters.map((c,i)=>`<a href="#outline" data-scroll="chapter-${i}">0${i+1} · ${t(c.title)}</a>`).join('')}</div>
+    <p class="note">${bi('先修是依赖关系，不是进度锁。西罗理论属于有限群专题；学习环可以直接从运算、同态与商结构继续。前沿课程各自链接所需基础。','Prerequisites express dependencies, not locks. Sylow theory is a finite-group topic; rings continue directly from operations, homomorphisms, and quotients. Each frontier topic links to the foundations it uses.')}</p>
+    ${chapters.map((chapter,i)=>`<section class="chapter-outline" id="chapter-${i}">
+      <div class="chapter-heading"><span class="chapter-index">0${i+1}</span><h2>${t(chapter.title)}</h2></div>
+      <h3 class="chapter-question">${t(chapter.question)}</h3>
+      <p class="chapter-purpose">${t(chapter.purpose)}</p>
+      <ul class="chapter-outcomes">${chapter.outcomes.map(goal=>`<li>${t(goal)}</li>`).join('')}</ul>
+      <p class="chapter-anchor">${t(chapter.anchor)}</p>
+      <div class="chapter-lessons">${chapter.lessons.map(id=>`<a href="#lesson/${id}"><span>${String(id).padStart(2,'0')}</span><strong>${t(lessons[id-1].title)}</strong><small>${t(plans[id].question)}</small> →</a>`).join('')}</div>
+      <p class="chapter-bridge">↳ ${t(chapter.bridge)}</p>
+    </section>`).join('')}
+    <a class="button primary" href="#lesson/1">${bi('从第一个问题开始','Begin with the first question')} →</a>
+  </main>`;
+}
+
+function lesson(id) {
+  const l = lessons[id-1], plan = plans[id], chapter = chapterFor(id);
+  const after = dependents(id);
+  app.innerHTML = `<div class="layout">
+    <aside class="sidebar" aria-label="课程目录 / Course navigation">
+      <a href="#outline">← ${bi('课程大纲','Course outline')}</a>
+      ${chapters.map((c,i)=>`<h3>0${i+1} · ${t(c.title)}</h3>${c.lessons.map(n=>`<a href="#lesson/${n}" class="${n===id ? 'active' : ''}" ${n===id ? 'aria-current="page"' : ''}>
+        ${String(n).padStart(2,'0')} ${t(lessons[n-1].title)} <span data-status="${n}">${completed(n) ? '✓' : ''}</span>
+      </a>`).join('')}`).join('')}
+    </aside>
+    <main id="main" class="lesson-main narrative-page">
+      <div class="breadcrumbs"><a href="#outline">${bi('课程大纲','Outline')}</a> / ${t(chapter.title)}</div>
+      <p class="eyebrow">LESSON ${String(id).padStart(2,'0')} OF ${lessons.length}</p>
+      <h1 class="lesson-title">${t(l.title)}</h1>
+      <p class="lesson-question">${t(plan.question)}</p>
+      <div class="lesson-context"><p class="recall">${t(plan.recall)}</p>
+        <div class="prerequisite-links"><span>${bi('从这里来','Builds on')}:</span> ${plan.prerequisites.length ? plan.prerequisites.map(lessonLink).join(' · ') : bi('集合、函数与整数算术','Sets, functions, and integer arithmetic')}</div>
+      </div>
+      <nav class="story-nav" aria-label="本课内容 / In this lesson">${plan.sections.map((section,i)=>`<a href="#lesson/${id}" data-scroll="section-${i}">${t(section.title)}</a>`).join('')}</nav>
+      ${renderLessonStory(l,plan,progress)}
+      <aside class="lesson-boundary"><p class="note">${t(l.caution)}</p></aside>
+      <details class="extension-exercise"><summary>${bi('进一步推敲','Take the idea further')} →</summary><p>${t(l.challenge)}</p></details>
+      <section class="lesson-connections">
+        <h2>${bi('这个问题把我们带向哪里？','Where does this question lead?')}</h2>
+        <p class="lesson-destination">${t(plan.destination)}</p>
+        ${after.length ? `<div class="downstream"><span>${bi('接着用到它的课程','Lessons that use this idea')}:</span> ${after.map(item=>lessonLink(item.id)).join('')}</div>` : `<a href="#map">${bi('选择下一条学习路线','Choose your next study route')} →</a>`}
+      </section>
+      <p class="small"><a href="#sources">${bi('参考资料与定理证明范围','References and proof scope')} ↗</a></p>
+      <div class="next-lesson">
+        ${id>1 ? `<a class="button" href="#lesson/${id-1}">← ${bi('上一篇','Previous')}</a>` : '<span></span>'}
+        ${id<lessons.length ? `<a class="button primary" href="#lesson/${id+1}">${bi('继续课程','Continue the course')} →</a>` : `<a class="button primary" href="#map">${bi('知识关系图','Knowledge map')} →</a>`}
+      </div>
+    </main>
+  </div>`;
+  mountLab(document.querySelector('#lesson-lab'),l.lab);
+  document.querySelectorAll('[data-quiz]').forEach(box=>{
+    const i = Number(box.dataset.quiz), q = l.questions[i];
+    box.querySelectorAll('button').forEach(button=>{
+      button.onclick = () => {
+        const correct = Number(button.dataset.answer) === q.answer;
+        box.querySelectorAll('button').forEach(option=>option.classList.toggle('selected',option===button));
+        const feedback = box.querySelector('.feedback');
+        feedback.className = `feedback ${correct ? 'correct' : 'incorrect'}`;
+        feedback.innerHTML = (correct ? bi('✓ 正确。','✓ Correct.') : bi('再想一想。','Think it through.')) + ' ' + t(q.why);
+        if (correct) {
+          progress[`${id}.${i}`] = true;
+          localStorage.setItem('algebra-progress-v1',JSON.stringify(progress));
+          box.querySelector('[data-solved]').textContent = '✓';
+          document.querySelector(`[data-status="${id}"]`).textContent = completed(id) ? '✓' : '';
+        }
+      };
+    });
+  });
+}
+
+function map() {
+  app.innerHTML = `<main id="main">
+    <div class="eyebrow">CONCEPTS AND CONNECTIONS</div><h1 class="lesson-title">${bi('每个概念，都有来路与去处。','Every idea has roots and destinations.')}</h1>
+    <p class="lead">${bi('下图从左向右读：先修概念 → 当前问题 → 使用它的后续课程。箭头表示知识依赖。课程编号方便定位，各条路线可以交叉。','Read each row from left to right: prerequisites → the current question → lessons that use it. Arrows indicate conceptual dependencies. Lesson numbers locate topics; study routes can intersect.')}</p>
+    <div class="dependency-map">${chapters.map((chapter,i)=>`<h2>0${i+1} · ${t(chapter.title)}</h2>${chapter.lessons.map(id=>`
+      <div class="dependency-row">
+        <div class="dependency-from"><div class="dependency-label">${bi('先修概念','Prerequisites')} <span class="dependency-arrow" aria-hidden="true">→</span></div>${plans[id].prerequisites.length ? plans[id].prerequisites.map(lessonLink).join('') : bi('集合 · 函数 · 整数','Sets · functions · integers')}</div>
+        <div class="dependency-topic"><div class="dependency-label">${String(id).padStart(2,'0')} · ${bi('当前问题','Current question')}</div>${lessonLink(id)}<small>${t(plans[id].question)}</small></div>
+        <div class="dependency-to"><div class="dependency-label"><span class="dependency-arrow" aria-hidden="true">→</span> ${bi('后续课程','Following lessons')}</div>${dependents(id).length ? dependents(id).map(l=>lessonLink(l.id)).join('') : bi('继续专题阅读','Continue with specialist reading')}</div>
+      </div>`).join('')}`).join('')}</div>
+    <div class="panel"><h2>${bi('同一种构造，在不同章节再次出现','The same construction returns in different chapters')}</h2>
+      <div class="linkrow">${lessonLink(4)} → ${lessonLink(5)} → ${lessonLink(6)} → ${lessonLink(10)}</div>
+      <p>${bi('陪集是分块，纤维解释被合并的元素，商群赋予这些块运算，理想则让商上的乘法也成立。回到同一个例子时，观察新增了哪一个条件。','Cosets give a partition, fibers explain which elements merge, quotients put an operation on the blocks, and ideals make quotient multiplication work. Each return to an example adds a specific condition.')}</p>
+    </div>
+  </main>`;
+}
+
+function sourcePage() {
+  app.innerHTML = `<main id="main">
+    <div class="eyebrow">READING ROOM</div><h1 class="lesson-title">${bi('参考资料与数学约定','References and mathematical conventions')}</h1>
+    <div class="panel"><h2>${bi('如何沿着课程学习','Following the course')}</h2>
+      <p>${bi('从课程大纲了解六部分的目的，再进入具体问题。各页根据内容使用对照、构造、推理、操作或研究导览。练习出现在所检验的概念附近；“从这里来”与“带向哪里”连接课与课。','Start with the outline to understand the purpose of each chapter, then enter a concrete question. Lessons use comparisons, constructions, arguments, experiments, or research guides as the topic requires. Checks appear near the ideas they test; prerequisites and destinations connect the lessons.')}</p>
+      <p>${bi('西罗、伽罗瓦基本定理、根式可解判据和模结构定理等长定理，在相应课程中标明引用的结论与本课展示的应用论证。前沿课程分别说明问题陈述、已知实例和仍未解决的部分。','For longer results such as Sylow, the fundamental theorem of Galois theory, the radical-solvability criterion, and module structure theorems, the lesson identifies the quoted theorem and its worked application. Frontier lessons distinguish the question, established examples, and what remains unresolved.')}</p>
+      <p>${bi('环默认含 1，环同态保持 1。域满足 1≠0。D₄ 表示 8 阶正方形对称群。函数复合 fg 从右向左作用。有限代数实验使用精确整数运算；实曲线图展示几何构造。','Rings have 1 and ring homomorphisms preserve 1. Fields have 1≠0. D₄ is the order-8 square symmetry group. Composition fg acts right to left. Finite algebra experiments use exact integer arithmetic; real curves illustrate geometric constructions.')}</p>
+    </div>
+    <ol class="source-list">${sources.map(([name,url])=>`<li><a href="${url}" target="_blank" rel="noreferrer">${name} ↗</a></li>`).join('')}</ol>
+    <div class="panel"><h2>${bi('来源与学习记录','Sources and learning records')}</h2>
+      <p>${bi('交互课程的总体理念参考 cbwang2016/logic-course，本站文字与代码独立编写。开放问题来源核对日期：2026-10-20。','The interactive-course idea is inspired by cbwang2016/logic-course. This site’s prose and code are independently authored. Open-problem references checked on 2026-10-20.')}</p>
+      <p>${bi('答对后自动保存。记录属于当前浏览器和站点地址；每课题目全部答对后显示完成标记。阅读拓展练习不计入答题进度。','Correct answers are saved automatically in this browser for this site address. A lesson is marked complete when all its checks are solved. Reading extension exercises does not count as solving a question.')}</p>
+      <p>${solvedCount()} / ${totalQuestions} ${bi('题已掌握','questions solved')}</p>
+      <button id="reset-progress">${bi('清空学习进度','Clear learning progress')}</button><span id="reset-message" role="status"></span>
+    </div>
+  </main>`;
+  document.querySelector('#reset-progress').onclick = () => {
+    Object.keys(progress).forEach(key=>delete progress[key]);
+    localStorage.removeItem('algebra-progress-v1');
+    sourcePage();
+    document.querySelector('#reset-message').innerHTML = bi(' 已清空。',' Progress cleared.');
+  };
+}
+
+document.addEventListener('click',event=>{
+  const link = event.target.closest('a');
+  if (link?.dataset.scroll) {
+    event.preventDefault();
+    document.getElementById(link.dataset.scroll).scrollIntoView();
+  }
+  if (link?.classList.contains('skip')) {
+    event.preventDefault();
+    document.getElementById('main').focus();
+  }
+});
+
+function render() {
+  const route = location.hash.slice(1) || 'home';
+  let page = route;
+  if (/^lesson\/(?:[1-9]|1\d|2[0-4])$/.test(route)) {
+    const id = Number(route.split('/')[1]);
+    lesson(id);
+    document.title = `${lessons[id-1].title.zh} · Algebra Atlas`;
+    page = 'lesson';
+  } else {
+    const pages = {home,outline,map,sources:sourcePage};
+    if (Object.hasOwn(pages,route)) pages[route]();
+    else app.innerHTML = `<main id="main"><h1>${bi('课程地址不存在','Lesson not found')}</h1><a class="button" href="#outline">${bi('查看课程大纲','View the course outline')}</a></main>`;
+    document.title = '结构之旅 · Algebra Atlas';
+  }
+  document.querySelector('#topnav').innerHTML = [
+    ['home','课程','Course'],['outline','课程大纲','Outline'],['map','知识关系','Connections'],['sources','阅读室','Readings']
+  ].map(([key,zh,en])=>`<a href="#${key}" class="${key===page || (key==='home'&&page==='lesson') ? 'active' : ''}">${bi(zh,en)}</a>`).join('');
+  document.getElementById('main').setAttribute('tabindex','-1');
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange',render);
+render();

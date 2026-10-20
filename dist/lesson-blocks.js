@@ -1,0 +1,10 @@
+export const b = (zh, en) => ({zh, en});
+export const text = (title, body) => ({kind:'text', title, body});
+export const lab = (title, prompt) => ({kind:'lab', title, prompt});
+export const concept = title => ({kind:'concept', title});
+export const argument = (title, intro) => ({kind:'argument', title, intro});
+export const example = title => ({kind:'example', title});
+export const quiz = (index, title) => ({kind:'quiz', index, title});
+export const comparison = (title, items) => ({kind:'comparison', title, items});
+export const steps = (title, items) => ({kind:'steps', title, items});
+export const callout = (title, body) => ({kind:'callout', title, body});
