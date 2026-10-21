@@ -1,14 +1,4 @@
 const b=(zh,en)=>({zh,en});
-export const sources=[
- ['参考项目 · Logic & Set Theory','https://github.com/cbwang2016/logic-course'],
- ['Thomas W. Judson · Abstract Algebra: Theory and Applications','https://abstract.ups.edu/'],
- ['J. S. Milne · Group Theory','https://jmilne.org/math/CourseNotes/gt.html'],
- ['J. S. Milne · Fields and Galois Theory','https://jmilne.org/math/CourseNotes/ft.html'],
- ['J. S. Milne · Algebraic Geometry','https://jmilne.org/math/CourseNotes/ag.html'],
- ['Keith Conrad · The Galois Correspondence','https://kconrad.math.uconn.edu/blurbs/galoistheory/galoiscorrthms.pdf'],
- ['Clay Mathematics Institute · Birch and Swinnerton-Dyer','https://www.claymath.org/millennium/birch-and-swinnerton-dyer-conjecture/'],
- ['American Institute of Mathematics · Problem Lists','https://aimath.org/problemlists/']
-];
 const q=(zh,en,options,answer,whyZh,whyEn)=>({prompt:b(zh,en),options:options.map(x=>b(...x)),answer,why:b(whyZh,whyEn)});
 const lessons=[];
 function add(title,goal,lab,definition,formula,theorem,proof,example,caution,questions,challenge){lessons.push({id:lessons.length+1,title:b(...title),goal:b(...goal),lab,definition:b(...definition),formula,theorem:b(...theorem),proof:proof.map(x=>b(...x)),example:b(...example),caution:b(...caution),questions,challenge:b(...challenge)});}
@@ -86,7 +76,7 @@ add(['西罗定理与有限群','Sylow theory and finite groups'],['用素数幂
  [q('15 阶群的 n₅ 等于？','What is n₅ for a group of order 15?',[['1','1'],['3','3'],['5','5']],0,'同时满足整除与同余条件的只有 1。','Only 1 meets both constraints.'),q('唯一的西罗 p 子群是否正规？','Is a unique Sylow p-subgroup normal?',[['是','Yes'],['否','No']],0,'共轭仍是同阶的西罗子群。','Conjugation gives another Sylow subgroup of the same order.')],
  ['21 阶群的西罗 7 子群数量只能是 1：它整除 3 且模 7 余 1。因此该子群正规。请逐步写出论证。','For order 21, n₇ divides 3 and is 1 modulo 7, hence n₇=1 and the subgroup is normal. Write the argument step by step.']);
 add(['环：加法与乘法相遇','Rings: addition meets multiplication'],['在同一个集合上同时组织两种运算。','Organize addition and multiplication on the same set.'],'ring',
- ['本课程中环都有乘法单位元 1；加法构成阿贝尔群，乘法结合，并满足左右分配律。交换环还要求乘法交换。单位是可乘法求逆的元素；非零零因子 a 满足存在非零 b 使 ab=0 或 ba=0。','Our rings have a multiplicative identity 1. Addition forms an abelian group; multiplication is associative and distributes on both sides. A commutative ring has commutative multiplication. A unit has a multiplicative inverse. A nonzero zero divisor a satisfies ab=0 or ba=0 for some nonzero b.'],
+ ['本课程中环都有乘法单位元 1；加法构成阿贝尔群，乘法结合，并满足左右分配律。环同态保持加法、乘法与单位元 1。交换环还要求乘法交换。单位是可乘法求逆的元素；非零零因子 a 满足存在非零 b 使 ab=0 或 ba=0。','Our rings have a multiplicative identity 1. Addition forms an abelian group; multiplication is associative and distributes on both sides. Ring homomorphisms preserve addition, multiplication, and 1. A commutative ring has commutative multiplication. A unit has a multiplicative inverse. A nonzero zero divisor a satisfies ab=0 or ba=0 for some nonzero b.'],
  'a(b+c)=ab+ac ; (a+b)c=ac+bc',
  ['在非零环中，单位不是零因子。','In a nonzero ring, a unit cannot be a zero divisor.'],
  [['若 u 可逆且 ux=0，左乘 u⁻¹ 得 x=u⁻¹0。','If u is invertible and ux=0, multiply on the left by u⁻¹ to get x=u⁻¹0.'],['由 a0=a(0+0)=a0+a0，加法消去给出 a0=0。','From a0=a(0+0)=a0+a0, additive cancellation gives a0=0.'],['因此 x=0；对 xu=0 右乘 u⁻¹ 同理。','Thus x=0. For xu=0, multiply on the right by u⁻¹.']],
