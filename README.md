@@ -2,6 +2,12 @@
 
 24 课中英双语抽象代数交互网站。原生 HTML、CSS、JavaScript，无第三方运行依赖，无构建步骤。
 
+## 在线访问与部署
+
+[打开课程网站](https://mengguojia.github.io/abstract-algebra-course/)
+
+推送到 `master` 后，GitHub Actions 运行课程测试，通过后将 `dist/` 发布到 GitHub Pages。部署配置位于 `.github/workflows/pages.yml`，也可在 Actions 页面手动运行。
+
 ## 启动
 
 在本目录运行：
